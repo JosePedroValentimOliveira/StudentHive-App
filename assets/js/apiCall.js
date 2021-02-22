@@ -1,8 +1,8 @@
 import {apiUrl} from './apiUrl';
 
-export const apiPost = async(params,options)=>{
+export const apiCall = async(params)=>{
     try {
-        let response = await fetch(`${apiUrl}/users/${params}`,options);
+        let response = await fetch(`${apiUrl}/users/${params}`);
         let json = await response.json();
         return json;
     } catch (error) {

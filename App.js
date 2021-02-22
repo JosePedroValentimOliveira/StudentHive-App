@@ -1,23 +1,137 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import {LoggedInScreen} from './components/LoggedInScreen';
-import {LoggedOutScreen} from './components/LoggedOutScreen';
+import React,{useState,useEffect,useMemo, useReducer } from 'react';
+import { StyleSheet, Text, View,ActivityIndicator } from 'react-native';
+import {LoggedInScreen} from './screens/LoggedInScreen';
+import {LoggedOutScreen} from './screens/LoggedOutScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AuthContext} from './components/context';
+import {apiPost} from './assets/js/apiPost'
 const Stack = createStackNavigator();
 export default function App() {
-  const loggedIn = false;
-  return (
-    <NavigationContainer>
-    <Stack.Navigator  screenOptions={{headerShown: false}}>
-      {loggedIn?
-      <Stack.Screen name="LoggedIn"  component={LoggedInScreen} />:
-      <Stack.Screen name="LoggedOut" component={LoggedOutScreen} />
+/*  const [isLoading,setIsLoading] =useState(true);
+ const [userToken,setUserToken] = useState(null); */
+
+
+
+ const sendToApi = async(email,password)=>{
+  
+}
+
+  const initialLoginState = {
+    isLoading: true,
+    userEmail:null,
+    userToken: null
+  }
+
+  const loginReducer = (prevState,action)=>{
+    switch (action.type) {
+      case 'LOGIN':
+        return {
+          ...prevState,
+          userEmail:action.email,
+          userToken:action.token,
+          isLoading: false,
+        };
+      
+      case 'LOGOUT':
+        return {
+          ...prevState,
+          userEmail:null,
+          userToken:null,
+          isLoading: false,
+        };
+      case 'RETRIEVE_TOKEN':
+        return {
+          ...prevState,
+          userToken:action.token,
+          isLoading: false,
+        };
+      
+    }
+  }
+
+  const [loginState,dispatch] = useReducer(loginReducer,initialLoginState);
+
+
+
+  const authContext = useMemo(() => ({
+    signIn: async(email,password)=>{
+      //api call hier voor echte authenticatie
+      let userToken;
+      userToken = null;
+      
+        try {
+          
+          
+          const user={
+            email:email.toLowerCase(),password
+          }
+          
+          
+             const options={
+              method:'POST',
+              headers:{
+                  'Accept':'application/json',
+                  'Content-Type':'application/json'
+              },
+              body: JSON.stringify(user)
+          };
+        
+          userToken = await apiPost("login",options)
+        
+          await AsyncStorage.setItem('@userToken',userToken);
+         
+          
+        } catch (error) {
+          console.log(error);
+        }
+      
+
+      dispatch({type:"LOGIN",email:email,token:userToken})
+    },
+    signOut: async()=>{
+      try {
+        await AsyncStorage.removeItem("@userToken");
+      } catch (error) {
+        console.log(error);
       }
-    </Stack.Navigator>
+      dispatch({type:"LOGOUT"})
+    }
+  }),[])
+
+
+  useEffect(()=>{
+    setTimeout(async()=>{
+      let userToken;
+      userToken = null;
+      try {
+        userToken = await AsyncStorage.getItem("@userToken");
+      } catch (error) {
+        console.log(error);
+      }
+      dispatch({type:"RETRIEVE_TOKEN",token:userToken})
+    },1000)
+  },[])
+  
+
+  if(loginState.isLoading){
+    return(
+      <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
+        <ActivityIndicator size="large"/>
+      </View>
+    )
+  }
+  return (
+    <AuthContext.Provider value={authContext}>
+    <NavigationContainer>
+    <StatusBar style="auto"/>
+      {loginState.userToken != null? <LoggedInScreen/>:<LoggedOutScreen/> }
+      
+      
     </NavigationContainer>
+    </AuthContext.Provider>
   );
 }
 

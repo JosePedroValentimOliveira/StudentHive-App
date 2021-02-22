@@ -1,16 +1,26 @@
 import { StatusBar } from 'expo-status-bar';
-import React,{useState} from 'react';
+import React,{useState,useContext} from 'react';
 import { StyleSheet, Text, View,Image, Dimensions, TextInput, TouchableOpacity,KeyboardAvoidingView } from 'react-native';
 import {Colors} from '../assets/js/constants';
 import { MaterialIcons,FontAwesome5 } from '@expo/vector-icons';
 import {apiPost} from '../assets/js/apiPost'
 import bcrypt from 'react-native-bcrypt'
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AuthContext} from '../components/context';
+
 export const LoginScreen = ({navigation}) => {
     const [email,setEmail] = useState();
     const [password,setPassword]= useState();
+    
 
-    const sendToApi = ()=>{
+    const {signIn} = useContext(AuthContext);
+
+    const signInUser = (email,password)=>{
+      email = email.toLowerCase();
+      signIn(email,password);
+    }
+   /*  const sendToApi = ()=>{
       const user={
         email:email.toLowerCase(),password
       }
@@ -25,17 +35,18 @@ export const LoginScreen = ({navigation}) => {
           body: JSON.stringify(user)
       };
   
-      apiPost("login",options).then(resp=>{
+      apiPost("login",options).then(async(resp)=>{
         if(resp != null){
-          navigation.replace("LoggedIn")
-            
+          await AsyncStorage.setItem("@User",JSON.stringify(resp));
+          const user = await AsyncStorage.getItem("@User");
+          
         }
       })
       
 
       
       
-    }
+    } */
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -67,7 +78,7 @@ export const LoginScreen = ({navigation}) => {
         />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={()=>{sendToApi()}}>
+        <TouchableOpacity style={styles.button} onPress={()=>{signInUser(email,password)}}>
           <Text style={styles.loginText}>Inloggen</Text>
         </TouchableOpacity>
 
