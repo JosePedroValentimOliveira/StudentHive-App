@@ -4,7 +4,7 @@ import { StyleSheet, Text, View,Image, Dimensions, TextInput, TouchableOpacity,K
 import {Colors} from '../assets/js/constants';
 import { MaterialIcons,FontAwesome5 } from '@expo/vector-icons';
 import {apiPost} from '../assets/js/apiPost'
-import bcrypt from 'react-native-bcrypt'
+
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthContext} from '../components/context';
@@ -16,7 +16,9 @@ export const LoginScreen = ({navigation}) => {
 
     const {signIn} = useContext(AuthContext);
 
+    
     const signInUser = (email,password)=>{
+      
       email = email.toLowerCase();
       signIn(email,password);
     }
@@ -78,7 +80,7 @@ export const LoginScreen = ({navigation}) => {
         />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={()=>{signInUser(email,password)}}>
+        <TouchableOpacity style={styles.button} onPress={async()=>{signInUser(email,password);}}>
           <Text style={styles.loginText}>Inloggen</Text>
         </TouchableOpacity>
 

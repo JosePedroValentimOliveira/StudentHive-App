@@ -17,7 +17,6 @@ export const LoggedInScreen = () => {
     let userToken;
     userToken = null;
     try {
-    
     return await AsyncStorage.getItem('@userToken');
      
       } catch (error) {

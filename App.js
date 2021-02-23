@@ -16,7 +16,21 @@ export default function App() {
 
 
  const sendToApi = async(email,password)=>{
+  const user={
+    email:email.toLowerCase(),password
+  }
   
+  
+     const options={
+      method:'POST',
+      headers:{
+          'Accept':'application/json',
+          'Content-Type':'application/json'
+      },
+      body: JSON.stringify(user)
+  };
+
+  return await apiPost("login",options)
 }
 
   const initialLoginState = {
@@ -45,7 +59,7 @@ export default function App() {
       case 'RETRIEVE_TOKEN':
         return {
           ...prevState,
-          userToken:action.token,
+          token:action.token,
           isLoading: false,
         };
       
@@ -54,41 +68,19 @@ export default function App() {
 
   const [loginState,dispatch] = useReducer(loginReducer,initialLoginState);
 
-
+ 
 
   const authContext = useMemo(() => ({
     signIn: async(email,password)=>{
       //api call hier voor echte authenticatie
-      let userToken;
-      userToken = null;
-      
-        try {
-          
-          
-          const user={
-            email:email.toLowerCase(),password
-          }
-          
-          
-             const options={
-              method:'POST',
-              headers:{
-                  'Accept':'application/json',
-                  'Content-Type':'application/json'
-              },
-              body: JSON.stringify(user)
-          };
-        
-          userToken = await apiPost("login",options)
-        
-          await AsyncStorage.setItem('@userToken',userToken);
-         
-          
-        } catch (error) {
-          console.log(error);
-        }
-      
 
+      try {
+        let userToken = await sendToApi(email,password);
+        await AsyncStorage.setItem("@userToken",userToken);
+        
+      } catch (error) {
+        
+      }
       dispatch({type:"LOGIN",email:email,token:userToken})
     },
     signOut: async()=>{
@@ -107,7 +99,9 @@ export default function App() {
       let userToken;
       userToken = null;
       try {
+        await AsyncStorage.setItem('@userToken','601d4617b8aca92140636dcb');
         userToken = await AsyncStorage.getItem("@userToken");
+        console.log('usertoken on start',loginState.userToken);
       } catch (error) {
         console.log(error);
       }
