@@ -6,3 +6,4 @@ export const Colors ={
     "Text":"#FFFFFF",
     "CheckButton":"#CB8F03"
 }
+export const apiUrl = 'http://192.168.0.157:3000/users';

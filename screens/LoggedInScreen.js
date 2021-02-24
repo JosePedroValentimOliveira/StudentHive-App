@@ -1,42 +1,26 @@
+import AsyncStorage from '@react-native-community/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import React,{useState,useContext, useEffect} from 'react';
-import { StyleSheet, Text, View,Button,Image, Dimensions, TextInput, TouchableOpacity,KeyboardAvoidingView, MaskedViewBase } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet, Text, View,Image, Dimensions, TextInput, TouchableOpacity,KeyboardAvoidingView, MaskedViewBase,Button } from 'react-native';
+import {AuthContext} from '../components/context';
+import axios from 'axios';
+import {apiUrl} from '../assets/js/constants';
 
-import {apiCall} from '../assets/js/apiCall';
-import {HomeScreen} from './HomeScreen';
-import {ProfileScreen} from './ProfileScreen';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-const Tab = createBottomTabNavigator();
-export const LoggedInScreen = () => {
-  
-  
-  const [user,setUser] = useState([]);
+export const LoggedInScreen =() => {
+  const {signOut} = useContext(AuthContext);
+  const [user,setUser] = useState({});
   const getUser = async()=>{
-    let userToken;
-    userToken = null;
-    try {
-    return await AsyncStorage.getItem('@userToken');
-     
-      } catch (error) {
-      console.log(error);
-    }
-    
+    return (await axios.get(`${apiUrl}/user/${await AsyncStorage.getItem('@userToken')}`)).data
   }
-  const userInformation = async()=>{
-    
-    setUser(await apiCall(`/user/${await getUser()}`));
-    
-  }
-
-
   useEffect(()=>{
-    userInformation();
+    getUser().then(resp=>setUser(resp));
   },[])
   return (
-      <Tab.Navigator>
-        <Tab.Screen name="Home" component={HomeScreen}/>
-        <Tab.Screen name="Profile" children={()=><ProfileScreen user={user}/>} />
-      </Tab.Navigator>
+      <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
+        <Text>Hallo je bent nu ingelogd</Text>
+        <Text>{user.firstName} {user.lastName}</Text>
+        
+        <Button title="Sign Out" onPress={ ()=>{signOut()}}/>
+      </View>
   )}

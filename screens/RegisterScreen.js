@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React,{useState,useEffect} from 'react';
-import { StyleSheet, Text, View,Image, Dimensions, TextInput, TouchableOpacity,TouchableWithoutFeedback,KeyboardAvoidingView, Platform, Keyboard,  } from 'react-native';
+import { StyleSheet, Text, View,Image, Dimensions, TextInput, TouchableOpacity,TouchableWithoutFeedback,KeyboardAvoidingView, MaskedViewBase, Keyboard } from 'react-native';
 import {Colors} from '../assets/js/constants';
 import { RadioButton } from 'react-native-paper';
 import {apiPost} from '../assets/js/apiPost';
@@ -16,7 +16,7 @@ const DismissKeyboard = ({ children }) => (
 export const RegisterScreen = ({navigation}) => {
     const [keyboardVis,setKeyboardVis] = useState(false);
     const [gender,setGender]= useState();
-    const [birthday,setBirthday]= useState();
+    const [birthDay,setBirthDay]= useState();
     const [isValid,setIsValid]= useState(true);
     const [firstName,setFirstName] = useState();
     const [lastName,setLastName] = useState();
@@ -29,7 +29,7 @@ export const RegisterScreen = ({navigation}) => {
     const registerUser = () =>{
 
       
-      if(!firstName,!lastName,!birthday,!gender,!email,!password,!password2){
+      if(!firstName,!lastName,!birthDay,!gender,!email,!password,!password2){
         
         Toast.show({
           type:'error',
@@ -55,15 +55,15 @@ export const RegisterScreen = ({navigation}) => {
         });
       }
       else{
-        var dates = birthday.split('/');
-        var date = new Date(dates[2],dates[1]-1,dates[0]);
-        
-       
+        var dates = birthDay.split('/');
+        var date = new Date(dates[2],dates[1]-1,dates[0]).toDateString();
+        console.log(dates);
+        console.log(date);
         
         const user={
-          firstName,lastName,birthday,gender,email,password
+          firstName,lastName,birthDay,gender,email,password
         }
-        
+
         const options={
           method:'POST',
           headers:{
@@ -74,7 +74,9 @@ export const RegisterScreen = ({navigation}) => {
       };
   
       apiPost("register",options).then(resp=>console.log(resp))
-      } 
+      }
+     
+         
     };
 
     
@@ -91,14 +93,12 @@ export const RegisterScreen = ({navigation}) => {
       <Toast ref={(ref) => Toast.setRef(ref)} />
      
         <View style={styles.imageContainer}>
-          
-        {!keyboardVis ?  <Image style={styles.image} source={require('../assets/images/studentHiveLogo.png')}/>:
-        <View style={{backgroundColor:"blue"}}></View>
+        {!keyboardVis?  <Image style={styles.image} source={require('../assets/images/studentHiveLogo.png')}/>:
+        <View></View>
       }
-      
         </View>
-      <KeyboardAvoidingView behavior="height" style={{flex:3,width:"100%",height:"80%",alignItems:"center",justifyContent: 'center'}}>
-           
+      <KeyboardAvoidingView behavior="padding" style={{flex:3,width:"100%",alignItems:"center",justifyContent: 'center'}}>
+            
         
      
       <View style={styles.inputView} >
@@ -126,8 +126,8 @@ export const RegisterScreen = ({navigation}) => {
             placeholderTextColor="white"
             type={'datetime'}
             options={{format:'DD/MM/YYYY'}}
-            value={birthday}
-            onChangeText={text=>{setBirthday(text)}}
+            value={birthDay}
+            onChangeText={text=>{setBirthDay(text)}}
             ref={(ref)=> datetimeField = ref}
             onEndEditing={()=>{setIsValid(datetimeField.isValid());console.log(isValid);}}
             
@@ -175,7 +175,6 @@ export const RegisterScreen = ({navigation}) => {
             placeholder="Email" 
             placeholderTextColor="white"
             onEndEditing={(event)=>{setEmail(event.nativeEvent.text.toLowerCase())}}
-            keyboardType={"email-address"}
             
         />
         </View>
@@ -198,7 +197,6 @@ export const RegisterScreen = ({navigation}) => {
             onEndEditing={(event)=>{setPassword2(event.nativeEvent.text)}}
         />
         </View>
-        </KeyboardAvoidingView>
         
         <TouchableOpacity onPress={()=>{navigation.navigate('Login')}}>
           <Text style={styles.forgot}>Ik heb al een account</Text>
@@ -208,7 +206,7 @@ export const RegisterScreen = ({navigation}) => {
           <Text style={styles.loginText}>Nieuwe Account maken</Text>
         </TouchableOpacity>
         
-      
+      </KeyboardAvoidingView>
       
     </View>
     </DismissKeyboard>
@@ -234,7 +232,6 @@ const styles = StyleSheet.create({
       
   },
   image:{
-    backgroundColor:"red",
     width:Math.round(Dimensions.get("window").width * 12 / 16),
     height:Math.round(Dimensions.get("window").width * 6 / 16),
    
